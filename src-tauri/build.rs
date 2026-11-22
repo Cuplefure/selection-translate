@@ -75,17 +75,43 @@ fn make_png(size: usize) -> Vec<u8> {
     png
 }
 
-fn make_ico(png: &[u8]) -> Vec<u8> {
+fn make_ico() -> Vec<u8> {
+    const S: usize = 32;
+    let mut dib = Vec::new();
+    dib.extend_from_slice(&40u32.to_le_bytes());
+    dib.extend_from_slice(&(S as u32).to_le_bytes());
+    dib.extend_from_slice(&((S * 2) as u32).to_le_bytes());
+    dib.extend_from_slice(&1u16.to_le_bytes());
+    dib.extend_from_slice(&32u16.to_le_bytes());
+    dib.extend_from_slice(&0u32.to_le_bytes());
+    dib.extend_from_slice(&((S * S * 4) as u32).to_le_bytes());
+    for _ in 0..4 {
+        dib.extend_from_slice(&0u32.to_le_bytes());
+    }
+    for y in (0..S).rev() {
+        for x in 0..S {
+            let fx = x as f64 / S as f64;
+            let fy = y as f64 / S as f64;
+            let bubble = ((0.20..=0.80).contains(&fx) && (0.24..=0.62).contains(&fy))
+                || ((0.34..=0.50).contains(&fx) && (0.62..=0.76).contains(&fy));
+            let (r, g, b) = if bubble { (255, 255, 255) } else { (83, 74, 183) };
+            dib.extend_from_slice(&[b, g, r, 255]);
+        }
+    }
+    for _ in 0..S {
+        dib.extend_from_slice(&[0u8; 4]);
+    }
+
     let mut ico = Vec::new();
     ico.extend_from_slice(&6u16.to_le_bytes());
     ico.extend_from_slice(&1u16.to_le_bytes());
     ico.extend_from_slice(&1u16.to_le_bytes());
-    ico.extend_from_slice(&[0, 0, 0, 0]);
+    ico.extend_from_slice(&[S as u8, S as u8, 0, 0]);
     ico.extend_from_slice(&1u16.to_le_bytes());
     ico.extend_from_slice(&32u16.to_le_bytes());
-    ico.extend_from_slice(&(png.len() as u32).to_le_bytes());
+    ico.extend_from_slice(&(dib.len() as u32).to_le_bytes());
     ico.extend_from_slice(&22u32.to_le_bytes());
-    ico.extend_from_slice(png);
+    ico.extend_from_slice(&dib);
     ico
 }
 
@@ -94,6 +120,6 @@ fn main() {
     fs::create_dir_all(icons).expect("failed to create icons directory");
     let png = make_png(256);
     fs::write(icons.join("icon.png"), &png).expect("failed to write icon.png");
-    fs::write(icons.join("icon.ico"), make_ico(&png)).expect("failed to write icon.ico");
+    fs::write(icons.join("icon.ico"), make_ico()).expect("failed to write icon.ico");
     tauri_build::build()
 }
