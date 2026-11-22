@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>划词翻译</title>
+  </head>
+  <body>
+    <section id="card-view" class="view card">
+      <header class="card-head">
+        <span class="brand">划词翻译 <span id="badge" class="badge"></span></span>
+        <span class="head-actions">
+          <button id="pin" type="button" title="固定在顶层">固定</button>
+          <button id="close" type="button" title="关闭">×</button>
+        </span>
+      </header>
+      <p id="state" class="state">选中文字后按 Alt+Shift+T 翻译</p>
+      <div id="source-row" class="source-row" hidden>
+        <span id="source-lang" class="lang">中文</span>
+        <span id="original" class="original"></span>
+      </div>
+      <p id="translated" class="translated"></p>
+      <footer class="card-foot">
+        <button id="translate" type="button">重新翻译</button>
+        <button id="speak" type="button">朗读</button>
+        <button id="copy" type="button" class="primary">复制英文</button>
+      </footer>
+      <div id="toast" class="toast" hidden></div>
+    </section>
+
+    <section id="settings-view" class="view settings" hidden>
+      <h1>设置</h1>
+      <label>翻译服务
+        <select id="provider">
+          <option value="deepl">DeepL API</option>
+          <option value="openai">OpenAI 兼容接口</option>
+          <option value="mock">本地模拟（无需密钥）</option>
+        </select>
+      </label>
+      <label>接口地址
+        <input id="endpoint" type="text" placeholder="https://api-free.deepl.com/v2/translate" />
+      </label>
+      <label>模型（OpenAI 兼容接口适用）
+        <input id="model" type="text" placeholder="gpt-4o-mini" />
+      </label>
+      <label>全局热键
+        <input id="hotkey" type="text" placeholder="Alt+Shift+T" />
+      </label>
+      <label>API 密钥
+        <input id="api-key" type="password" placeholder="保存在系统凭据管理器" autocomplete="off" />
+      </label>
+      <label class="check"><input id="auto-copy" type="checkbox" /> 自动复制模式（热键代替 Ctrl+C，需辅助功能权限）</label>
+      <label class="check"><input id="cache-enabled" type="checkbox" checked /> 启用本地翻译缓存</label>
+      <p class="hint">默认模式：在任意应用选中文字 → 按 Ctrl+C → 再按热键。开启自动复制后只需按热键。</p>
+      <div class="settings-actions">
+        <button id="save" type="button" class="primary">保存</button>
+        <button id="clear-cache" type="button">清空缓存</button>
+        <button id="close-settings" type="button">关闭</button>
+      </div>
+      <p id="settings-toast" class="toast" hidden></p>
+    </section>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

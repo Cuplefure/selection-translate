@@ -1,0 +1,107 @@
+:root {
+  --surface: #ffffff;
+  --text: #1f2328;
+  --muted: #6b7280;
+  --border: #d9dde3;
+  --accent: #534ab7;
+  --accent-text: #ffffff;
+  --error: #b42318;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --surface: #23262c;
+    --text: #f1efe8;
+    --muted: #a1a1a6;
+    --border: #3a3f47;
+    --accent: #7f77dd;
+    --accent-text: #ffffff;
+    --error: #f09595;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: var(--font-sans, system-ui, -apple-system, "Segoe UI", sans-serif);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text);
+  background: var(--surface);
+}
+
+.view { padding: 14px 16px; }
+.card { width: 380px; }
+
+.card-head, .card-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.brand { font-weight: 500; font-size: 14px; }
+.badge { font-size: 11px; color: var(--muted); margin-left: 6px; }
+.head-actions { display: flex; gap: 6px; }
+
+button {
+  font: inherit;
+  color: var(--text);
+  background: transparent;
+  border: 0.5px solid var(--border);
+  border-radius: 8px;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+button:hover { border-color: var(--accent); }
+button.primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+
+.state { color: var(--muted); margin: 18px 0; text-align: center; }
+.state.error { color: var(--error); }
+
+.source-row {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--muted) 10%, transparent);
+  margin-bottom: 10px;
+}
+
+.lang { color: var(--muted); font-size: 12px; flex: none; }
+.original { color: var(--muted); overflow-wrap: anywhere; max-height: 4.8em; overflow: hidden; }
+.translated { font-size: 15px; line-height: 1.7; margin: 10px 2px 18px; overflow-wrap: anywhere; }
+.card-foot { border-top: 0.5px solid var(--border); padding-top: 10px; }
+
+.toast {
+  position: absolute;
+  right: 16px;
+  bottom: 52px;
+  background: var(--accent);
+  color: var(--accent-text);
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.settings { width: 600px; max-width: 100vw; }
+.settings h1 { font-size: 15px; font-weight: 500; margin: 0 0 16px; }
+.settings label { display: block; margin-bottom: 12px; color: var(--muted); }
+.settings input[type="text"], .settings input[type="password"], .settings select {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+  padding: 7px 9px;
+  font: inherit;
+  color: var(--text);
+  background: transparent;
+  border: 0.5px solid var(--border);
+  border-radius: 8px;
+}
+.settings label.check { display: flex; align-items: center; gap: 8px; color: var(--text); }
+.settings label.check input { margin: 0; }
+.hint { color: var(--muted); font-size: 12px; }
+.settings-actions { display: flex; gap: 8px; margin-top: 16px; }
