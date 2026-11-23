@@ -1,5 +1,5 @@
 use crate::error::{AppError, AppResult};
-use redb::{Database, TableDefinition};
+use redb::{Database, ReadableTable, TableDefinition};
 use sha2::{Digest, Sha256};
 use std::path::PathBuf;
 use tauri::{AppHandle, Manager};

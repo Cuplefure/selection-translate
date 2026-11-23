@@ -12,7 +12,7 @@ pub fn send_ctrl_c() -> AppResult<()> {
         .key(Key::Control, Direction::Press)
         .map_err(|e| AppError::Platform(e.to_string()))?;
     keyboard
-        .key(Key::C, Direction::Click)
+        .key(Key::Unicode('c'), Direction::Click)
         .map_err(|e| AppError::Platform(e.to_string()))?;
     keyboard
         .key(Key::Control, Direction::Release)

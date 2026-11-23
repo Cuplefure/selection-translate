@@ -78,7 +78,7 @@ pub fn set_api_key(key: &str) -> AppResult<()> {
 }
 
 pub fn has_api_key() -> AppResult<bool> {
-    matches!(entry()?.get_password(), Ok(_))
+    Ok(matches!(entry()?.get_password(), Ok(_)))
 }
 
 pub fn api_key() -> AppResult<Option<String>> {

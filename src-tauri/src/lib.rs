@@ -13,7 +13,7 @@ use settings::Settings;
 use std::time::Instant;
 use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
-use tauri::{AppHandle, Emitter, Manager, WebviewWindowBuilder, WebviewWindowUrl};
+use tauri::{AppHandle, Emitter, Manager, WebviewWindowBuilder, WebviewUrl};
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, ShortcutState};
 
 #[derive(Debug, Clone, Serialize)]
@@ -124,7 +124,7 @@ fn open_settings_window(app: &AppHandle) -> AppResult<()> {
     WebviewWindowBuilder::new(
         app,
         "settings",
-        WebviewWindowUrl::App("index.html?view=settings".into()),
+        WebviewUrl::App("index.html?view=settings".into()),
     )
     .title("设置")
     .inner_size(640.0, 560.0)
@@ -281,7 +281,7 @@ pub fn run() {
             WebviewWindowBuilder::new(
                 &handle,
                 "card",
-                WebviewWindowUrl::App("index.html".into()),
+                WebviewUrl::App("index.html".into()),
             )
             .title("划词翻译")
             .inner_size(400.0, 300.0)
