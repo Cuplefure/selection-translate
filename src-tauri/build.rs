@@ -75,43 +75,32 @@ fn make_png(size: usize) -> Vec<u8> {
     png
 }
 
+/// Builds a version 3.00 ICO with a PNG-compressed image.
+///
+/// MSVC's `rc.exe` (used by tauri-winres on Windows) rejects an ICO whose
+/// `ICONDIR.idReserved` is non-zero with `RC2175: not in 3.00 format`.
+/// Embedding a complete PNG stream also avoids all DIB/AND-mask pitfalls of
+/// a hand-written BMP-based icon entry, and matches the format produced by
+/// Tauri's own `tauri icon` command.
 fn make_ico() -> Vec<u8> {
     const S: usize = 32;
-    let mut dib = Vec::new();
-    dib.extend_from_slice(&40u32.to_le_bytes());
-    dib.extend_from_slice(&(S as u32).to_le_bytes());
-    dib.extend_from_slice(&((S * 2) as u32).to_le_bytes());
-    dib.extend_from_slice(&1u16.to_le_bytes());
-    dib.extend_from_slice(&32u16.to_le_bytes());
-    dib.extend_from_slice(&0u32.to_le_bytes());
-    dib.extend_from_slice(&((S * S * 4) as u32).to_le_bytes());
-    for _ in 0..4 {
-        dib.extend_from_slice(&0u32.to_le_bytes());
-    }
-    for y in (0..S).rev() {
-        for x in 0..S {
-            let fx = x as f64 / S as f64;
-            let fy = y as f64 / S as f64;
-            let bubble = ((0.20..=0.80).contains(&fx) && (0.24..=0.62).contains(&fy))
-                || ((0.34..=0.50).contains(&fx) && (0.62..=0.76).contains(&fy));
-            let (r, g, b) = if bubble { (255, 255, 255) } else { (83, 74, 183) };
-            dib.extend_from_slice(&[b, g, r, 255]);
-        }
-    }
-    for _ in 0..S {
-        dib.extend_from_slice(&[0u8; 4]);
-    }
+    let png = make_png(S);
 
-    let mut ico = Vec::new();
-    ico.extend_from_slice(&6u16.to_le_bytes());
+    // ICONDIR: reserved must be 0, type 1 = icon, one image follows.
+    let mut ico = Vec::with_capacity(22 + png.len());
+    ico.extend_from_slice(&0u16.to_le_bytes());
     ico.extend_from_slice(&1u16.to_le_bytes());
     ico.extend_from_slice(&1u16.to_le_bytes());
+
+    // ICONDIRENTRY: 32x32, 256 colors marker 0, reserved 0, 1 plane, 32 bpp.
     ico.extend_from_slice(&[S as u8, S as u8, 0, 0]);
     ico.extend_from_slice(&1u16.to_le_bytes());
     ico.extend_from_slice(&32u16.to_le_bytes());
-    ico.extend_from_slice(&(dib.len() as u32).to_le_bytes());
+
+    // Size and offset of the embedded PNG stream (ICONDIR + ICONDIRENTRY = 22).
+    ico.extend_from_slice(&(png.len() as u32).to_le_bytes());
     ico.extend_from_slice(&22u32.to_le_bytes());
-    ico.extend_from_slice(&dib);
+    ico.extend_from_slice(&png);
     ico
 }
 
