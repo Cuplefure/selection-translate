@@ -75,32 +75,41 @@ fn make_png(size: usize) -> Vec<u8> {
     png
 }
 
-/// Builds a version 3.00 ICO with a PNG-compressed image.
+/// Builds a version 3.00 ICO with the standard Windows icon sizes.
 ///
 /// MSVC's `rc.exe` (used by tauri-winres on Windows) rejects an ICO whose
 /// `ICONDIR.idReserved` is non-zero with `RC2175: not in 3.00 format`.
-/// Embedding a complete PNG stream also avoids all DIB/AND-mask pitfalls of
-/// a hand-written BMP-based icon entry, and matches the format produced by
-/// Tauri's own `tauri icon` command.
+/// Every entry embeds a complete PNG stream instead of a hand-written BMP
+/// DIB, matching the multi-size layout produced by Tauri's `tauri icon`.
 fn make_ico() -> Vec<u8> {
-    const S: usize = 32;
-    let png = make_png(S);
+    const SIZES: [usize; 4] = [16, 32, 48, 256];
+    let images: Vec<Vec<u8>> = SIZES.iter().map(|&size| make_png(size)).collect();
 
-    // ICONDIR: reserved must be 0, type 1 = icon, one image follows.
-    let mut ico = Vec::with_capacity(22 + png.len());
+    let mut ico = Vec::with_capacity(
+        6 + 16 * SIZES.len() + images.iter().map(Vec::len).sum::<usize>(),
+    );
+
+    // ICONDIR: reserved must be 0, type 1 = icon, one entry per size.
     ico.extend_from_slice(&0u16.to_le_bytes());
     ico.extend_from_slice(&1u16.to_le_bytes());
-    ico.extend_from_slice(&1u16.to_le_bytes());
+    ico.extend_from_slice(&(SIZES.len() as u16).to_le_bytes());
 
-    // ICONDIRENTRY: 32x32, 256 colors marker 0, reserved 0, 1 plane, 32 bpp.
-    ico.extend_from_slice(&[S as u8, S as u8, 0, 0]);
-    ico.extend_from_slice(&1u16.to_le_bytes());
-    ico.extend_from_slice(&32u16.to_le_bytes());
+    // ICONDIRENTRY: dimension 0 encodes 256; colorCount/reserved are 0,
+    // planes is 1 and bitcount is 32 for every PNG-compressed entry.
+    let mut offset = 6u32 + 16 * SIZES.len() as u32;
+    for (&size, png) in SIZES.iter().zip(images.iter()) {
+        let dimension = if size >= 256 { 0u8 } else { size as u8 };
+        ico.extend_from_slice(&[dimension, dimension, 0, 0]);
+        ico.extend_from_slice(&1u16.to_le_bytes());
+        ico.extend_from_slice(&32u16.to_le_bytes());
+        ico.extend_from_slice(&(png.len() as u32).to_le_bytes());
+        ico.extend_from_slice(&offset.to_le_bytes());
+        offset += png.len() as u32;
+    }
 
-    // Size and offset of the embedded PNG stream (ICONDIR + ICONDIRENTRY = 22).
-    ico.extend_from_slice(&(png.len() as u32).to_le_bytes());
-    ico.extend_from_slice(&22u32.to_le_bytes());
-    ico.extend_from_slice(&png);
+    for png in &images {
+        ico.extend_from_slice(png);
+    }
     ico
 }
 
